@@ -1,0 +1,214 @@
+# Scalars personalizados
+scalar DateTime
+scalar Date
+
+# ====================================
+# TIPOS PRINCIPALES (Solo lo implementado)
+# ====================================
+
+type User {
+    userId: ID!
+    name: String!
+    email: String!
+    dateBirth: Date!
+    roles: [String!]!
+    profile: Profile
+    location: Location
+}
+
+type Profile {
+    profileId: ID!
+    displayName: String!
+    preferredLanguage: String!
+    avatarUrl: String!
+    bio: String!
+}
+
+type Location {
+    locationId: ID!
+    country: String!
+    region: String!
+    city: String!
+    lat: Float!
+    lng: Float!
+}
+
+enum ContentType {
+    VIDEO
+    IMAGE
+}
+
+type Content {
+    contentId: ID!
+    format: String!
+    fileSizeMB: Int!
+    language: String!
+    title: String!
+    contentType: ContentType!
+    description: String
+    recommendedAge: Int
+    storageUrl: String!
+    thumbnailUrl: String!
+    created: DateTime!
+    location: Location
+    user: User!
+    video: Video
+    image: Image
+    categories: [Category!]
+}
+
+type Video {
+    videoId: ID!
+    durationSeconds: Int!
+    width: Int!
+    height: Int!
+}
+
+type Image {
+    imageId: ID!
+    width: Int!
+    height: Int!
+}
+
+type Category {
+    categoryId: ID!
+    name: String!
+    description: String!
+}
+
+type AuthResponse {
+    token: String!
+    tokenType: String!
+    expiresIn: Int!
+    userId: ID!
+    userName: String!
+    email: String!
+    dateBirth: Date!
+    roles: [String!]!
+    profileId: ID
+    displayName: String
+    preferredLanguage: String
+    avatarUrl: String
+    bio: String
+}
+
+# ====================================
+# PAGINACIÓN
+# ====================================
+
+type ContentPage {
+    content: [Content!]!
+    totalElements: Int!
+    totalPages: Int!
+    pageNumber: Int!
+    pageSize: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+# ====================================
+# INPUTS
+# ====================================
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input UserRegistrationInput {
+    name: String!
+    email: String!
+    password: String!
+    dateBirth: Date!
+    roles: [Int!]
+    preferredLanguage: String
+    location: LocationInput!
+}
+
+input UserUpdateInput {
+    name: String!
+    email: String!
+    password: String
+    dateBirth: Date!
+    roles: [Int!]
+    preferredLanguage: String
+    location: LocationInput
+}
+
+input LocationInput {
+    country: String!
+    region: String!
+    city: String!
+    lat: Float!
+    lng: Float!
+}
+
+input ContentInput {
+    format: String!
+    fileSizeMB: Int!
+    language: String!
+    title: String!
+    contentType: ContentType!
+    description: String
+    recommendedAge: Int
+    storageUrl: String!
+    thumbnailUrl: String!
+    created: DateTime!
+    locationId: Int
+    categoryIds: [Int!]
+    videoMetadata: VideoInput
+    imageMetadata: ImageInput
+}
+
+input VideoInput {
+    durationSeconds: Int!
+    width: Int!
+    height: Int!
+}
+
+input ImageInput {
+    width: Int!
+    height: Int!
+}
+
+# ====================================
+# QUERIES (Solo Users y Content)
+# ====================================
+
+type Query {
+    # User queries
+    me: User!
+    user(userId: ID!): User!
+    userLocation(userId: ID!): Location!
+    
+    # Content queries
+    allContents(page: Int = 0, size: Int = 20): ContentPage!
+    contentsByType(contentType: ContentType!, page: Int = 0, size: Int = 20): ContentPage!
+    myContents(page: Int = 0, size: Int = 20): ContentPage!
+    myContentsByType(contentType: ContentType!, page: Int = 0, size: Int = 20): ContentPage!
+    userContents(userId: ID!, page: Int = 0, size: Int = 20): ContentPage!
+    userContentsByType(userId: ID!, contentType: ContentType!, page: Int = 0, size: Int = 20): ContentPage!
+    content(contentId: ID!): Content!
+    contentCategories(contentId: ID!): [Category!]!
+}
+
+# ====================================
+# MUTATIONS (Solo Users y Content)
+# ====================================
+
+type Mutation {
+    # Authentication
+    login(input: LoginInput!): AuthResponse!
+    register(input: UserRegistrationInput!): User!
+    
+    # User mutations
+    updateUser(userId: ID!, input: UserUpdateInput!): User!
+    deleteUser(userId: ID!): Boolean!
+    
+    # Content mutations
+    createContent(input: ContentInput!): Content!
+    updateContent(contentId: ID!, input: ContentInput!): Content!
+    deleteContent(contentId: ID!): Boolean!
+    addCategoriesToContent(contentId: ID!, categoryIds: [Int!]!): Content!
+    removeCategoryFromContent(contentId: ID!, categoryId: Int!): Boolean!
+}
